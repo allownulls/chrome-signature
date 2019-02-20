@@ -1,17 +1,36 @@
 {
- "manifest_version": 2,
-"name": "Custom Google Homepage",
- "description": "This extension changes the background image of the google homepage",
- "version": "1.0",
-"content_scripts": [
+	"manifest_version": 2,
+	"name": "Custom Google Homepage",
+	"description": "This extension changes the background image of the google homepage",
+	"version": "0.99",
+	"options_page": "options.html",
+	"options_ui": {
+		"page": "options.html",
+		"open_in_tab": false
+	},
+	"content_scripts": [
  {
- "matches": ["https://www.google.com/*"],
- "css": ["main.css"]
+	"matches": ["<all_urls>"],
+	"all_frames": true,
+	"css": ["main.css"]
  }
  ],
-"page_action": {
- "default_icon": "img.png",
- "default_popup": "popup.html",
- "default_title": "My custom google page!"
- }
+	"background": {
+	"scripts": [
+		"keycodes.js",
+		"tabs.js",
+		"background.js"
+	]
+	},
+
+	"browser_action": {
+	"default_icon": "img.png",
+	"default_title": "Sample"
+	},
+	"permissions": [
+		"<all_urls>",
+		"tts",
+		"tabs",
+		"storage"
+	]
 }
