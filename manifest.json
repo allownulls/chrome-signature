@@ -12,7 +12,8 @@
  {
 	"matches": ["<all_urls>"],
 	"all_frames": true,
-	"css": ["main.css"]
+	"css": ["main.css"],
+	"run_at": "document_end"
  }
  ],
 	"background": {

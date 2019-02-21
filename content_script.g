@@ -51,7 +51,12 @@ function onExtensionMessage(request) {
   }
 }
 
-function onKeyDown(evt) {	  	  
+function initContentScript() {
+  chrome.extension.onRequest.addListener(onExtensionMessage);
+  chrome.extension.sendRequest({'init': true}, onExtensionMessage);
+
+  document.addEventListener('keydown', function(evt) {	  
+	  
     if (!document.hasFocus()) {
       return true;
     }
@@ -63,9 +68,12 @@ function onKeyDown(evt) {
       return false;
     }
     return true;
+  }, false);
 }
 
-function checkForNewIframe(doc) {
+initContentScript();
+
+(function checkForNewIframe(doc) {
     if (!doc) return; // document does not exist. Cya
 
     // Note: It is important to use "true", to bind events to the capturing
@@ -74,7 +82,8 @@ function checkForNewIframe(doc) {
     // Gmail calls event.stopPropagation().
     // Calling addEventListener with the same arguments multiple times bind
     // the listener only once, so we don't have to set a guard for that.
-    doc.addEventListener('keydown', onKeyDown, true);    
+    doc.addEventListener('keydown', keyDown, true);
+    doc.addEventListener('keyup', keyUp, true);
     doc.hasSeenDocument = true;
     for (var i = 0, contentDocument; i<frames.length; i++) {
         try {
@@ -88,13 +97,5 @@ function checkForNewIframe(doc) {
         }
     }
     setTimeout(checkForNewIframe, 250, doc); // <-- delay of 1/4 second
-}
-
-function initContentScript() {
-  chrome.extension.onRequest.addListener(onExtensionMessage);
-  chrome.extension.sendRequest({'init': true}, onExtensionMessage);
-  checkForNewIframe(document);
-}
-
-initContentScript();
+})(document);
 
