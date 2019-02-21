@@ -20,7 +20,8 @@
 	"scripts": [
 		"keycodes.js",
 		"tabs.js",
-		"background.js"
+		"background.js",
+		"jsrsasign-all-min.js"
 	]
 	},
 

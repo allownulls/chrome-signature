@@ -1,6 +1,14 @@
 var signKeyStr;
 var changeNo = 0;
 
+function doSign() {
+  var rsa = new RSAKey();
+  rsa.readPrivateKeyFromPEMString(document.form1.prvkey1.value);
+  var hashAlg = document.form1.hashalg.value;
+  var hSig = rsa.sign(document.form1.msgsigned.value, hashAlg);
+  document.form1.siggenerated.value = linebrk(hSig, 64);
+}
+
 function changeSelection() {
   var focused = document.activeElement;
   var selectedText;
