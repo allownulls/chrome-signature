@@ -1,11 +1,4 @@
-/**
- * Copyright (c) 2011 The Chromium Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
-
-var lastUtterance = '';
-var speaking = false;
+var lastSelection = '';
 var globalUtteranceIndex = 0;
 
 if (localStorage['lastVersionUsed'] != '1') {
@@ -15,60 +8,35 @@ if (localStorage['lastVersionUsed'] != '1') {
   });
 }
 
-function speak(utterance) {
-  if (speaking && utterance == lastUtterance) {
-    chrome.tts.stop();
+function sign(selection) {
+  if (selection == lastSelection) {
     return;
   }
+  lastSelection = selection;
 
-  speaking = true;
-  lastUtterance = utterance;
-  globalUtteranceIndex++;
-  var utteranceIndex = globalUtteranceIndex;
-
-  chrome.browserAction.setIcon({path: 'SpeakSel19-active.png'});
-
-  var rate = localStorage['rate'] || 1.0;
-  var pitch = localStorage['pitch'] || 1.0;
-  var volume = localStorage['volume'] || 1.0;
-  var voice = localStorage['voice'];
-  chrome.tts.speak(
-      utterance,
-      {voiceName: voice,
-       rate: parseFloat(rate),
-       pitch: parseFloat(pitch),
-       volume: parseFloat(volume),
-       onEvent: function(evt) {
-         if (evt.type == 'end' ||
-             evt.type == 'interrupted' ||
-             evt.type == 'cancelled' ||
-             evt.type == 'error') {
-           if (utteranceIndex == globalUtteranceIndex) {
-             speaking = false;
-             chrome.browserAction.setIcon({path: 'SpeakSel19.png'});
-           }
-         }
-       }
-      });
+  var encodedText = '#Fileproof \n' + selection + '\n #Fileproof';
+  
+  return encodedText;
 }
 
 function initBackground() {
   loadContentScriptInAllTabs();
 
   var defaultKeyString = getDefaultKeyString();
-  var keyString = localStorage['speakKey'];
+  var keyString = localStorage['signKey'];
   if (keyString == undefined) {
     keyString = defaultKeyString;
-    localStorage['speakKey'] = keyString;
+    localStorage['signKey'] = keyString;
   }
   sendKeyToAllTabs(keyString);
 
   chrome.extension.onRequest.addListener(
-      function(request, sender, sendResponse) {
-        if (request['init']) {
-          sendResponse({'key': localStorage['speakKey']});
-        } else if (request['speak']) {
-          speak(request['speak']);
+      function(request, sender, sendResponse) {		
+        if (request['init']) {			
+          sendResponse({'key': localStorage['signKey']});
+        } else if (request['sign']) {
+		  var signed = sign(request['sign']);		  
+          sendResponse(signed);
         }
       });
 
@@ -76,7 +44,7 @@ function initBackground() {
       function(tab) {
         chrome.tabs.sendRequest(
             tab.id,
-            {'speakSelection': true});
+            {'changeSelection': true});
       });
 }
 

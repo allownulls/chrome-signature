@@ -1,36 +1,41 @@
-/**
- * Copyright (c) 2011 The Chromium Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
+var signKeyStr;
+var changeNo = 0;
 
-var speakKeyStr;
-
-function speakSelection() {
+function changeSelection() {
   var focused = document.activeElement;
   var selectedText;
+  var newText;    
   if (focused) {
     try {
       selectedText = focused.value.substring(
           focused.selectionStart, focused.selectionEnd);
-    } catch (err) {
-    }
-  }
-  if (selectedText == undefined) {
+    } catch (err) {}
+  	
+	if (selectedText !== undefined)		
+		chrome.extension.sendRequest({'sign': selectedText}, 
+			function (text) {  								
+				if (text !== undefined){
+					focused.value = focused.value.replace(selectedText, text);
+				}				
+			}
+		);	
+  } else {
     var sel = window.getSelection();
     var selectedText = sel.toString();
+	alert(selectedText);
   }
-  chrome.extension.sendRequest({'speak': selectedText});
+ 
+	
 }
 
-function onExtensionMessage(request) {
-  if (request['speakSelection'] != undefined) {
+function onExtensionMessage(request) {	
+  if (request['changeSelection'] != undefined) {
     if (!document.hasFocus()) {
       return;
     }
-    speakSelection();
+    changeSelection();
   } else if (request['key'] != undefined) {
-    speakKeyStr = request['key'];
+    signKeyStr = request['key'];
   }
 }
 
@@ -38,13 +43,14 @@ function initContentScript() {
   chrome.extension.onRequest.addListener(onExtensionMessage);
   chrome.extension.sendRequest({'init': true}, onExtensionMessage);
 
-  document.addEventListener('keydown', function(evt) {
+  document.addEventListener('keydown', function(evt) {	  
+	  
     if (!document.hasFocus()) {
       return true;
     }
-    var keyStr = keyEventToString(evt);
-    if (keyStr == speakKeyStr && speakKeyStr.length > 0) {
-      speakSelection();
+    var keyStr = keyEventToString(evt);	
+    if (keyStr == signKeyStr && signKeyStr.length > 0) {		
+      changeSelection();
       evt.stopPropagation();
       evt.preventDefault();
       return false;
