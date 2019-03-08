@@ -13,7 +13,7 @@ function changeSelection() {
   var focused = document.activeElement;
   var selectedText;
   var newText;
-  alert('elem:' + document.activeElement.innerHTML);
+  //alert('elem:' + document.activeElement.innerHTML);
   if (focused) {
     try {
       selectedText = focused.value.substring(

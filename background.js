@@ -8,7 +8,7 @@ if (localStorage['lastVersionUsed'] != '1') {
   });
 }
 
-function sign(selection) {
+function sign(selection, sendResponse) {
   if (selection == lastSelection) {
     return;
   }
@@ -16,9 +16,9 @@ function sign(selection) {
 
   var signed;
   var encodedText;
-  alert('selection:' + selection);
+  //alert('selection:' + selection);
   
-  alert('key:' + window.localStorage.getItem('pkey'));
+  //alert('key:' + window.localStorage.getItem('pkey'));
 //   chrome.storage.sync.get({
 //     pkey: '',
 //   }, function(items) {
@@ -26,13 +26,32 @@ function sign(selection) {
 	// alert('signed:' + signed);
 	// encodedText = selection + '#Fileproof \n' + signed + '\n #Fileproof';
 //   });
-  
-  
-  
+    
 	signed = doSign(selection,window.localStorage.getItem('pkey'));
-	alert('signed:' + signed);
+	//alert('signed:' + signed);
+	
 	encodedText = selection + '\n \n #Fileproof \n' + signed + '\n #Fileproof';  
-  	return encodedText;
+	alert('encoded: ' + encodedText);
+	callApiVote(encodedText, sendResponse);	
+}
+
+function callApiVote(text, sendResponse) 
+{
+	var url = "http://cvproof-prototype.azurewebsites.net/Ballot/Vote?par=0";
+	var debugurl = "http://localhost:14733/Ballot/Vote?par=0"
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.open("GET", debugurl);
+	xhr.onreadystatechange = function() {		
+  		if (xhr.readyState == 4) {  
+			alert("onreadystatechange, readyState=" + xhr.readyState + ", responseText = " + xhr.responseText);	  				
+			let msg = text + '\n #returned \n' + xhr.responseText + '\n #returned';
+    		sendResponse(msg);
+  		}
+	}
+
+	xhr.send();	
 }
 
 function doSign(message, key) {
@@ -61,10 +80,10 @@ function initBackground() {
       function(request, sender, sendResponse) {		
         if (request['init']) {			
           sendResponse({'key': localStorage['signKey']});
-        } else if (request['sign']) {
-		  var signed = sign(request['sign']);		  
-          sendResponse(signed);
+        } else if (request['sign']) {			
+		  sign(request['sign'], sendResponse)		  
         }
+		return true;
       });
 
   chrome.browserAction.onClicked.addListener(
