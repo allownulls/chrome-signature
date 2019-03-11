@@ -29,25 +29,26 @@ function sign(selection, sendResponse) {
     
 	signed = doSign(selection,window.localStorage.getItem('pkey'));
 	//alert('signed:' + signed);
-	
+		
 	encodedText = selection + '\n \n #Fileproof \n' + signed + '\n #Fileproof';  
 	alert('encoded: ' + encodedText);
-	callApiVote(encodedText, sendResponse);	
+	callApiVote(encodedText, sendResponse);
 }
 
 function callApiVote(text, sendResponse) 
 {
-	var url = "http://cvproof-prototype.azurewebsites.net/Ballot/Vote?par=0";
-	var debugurl = "http://localhost:14733/Ballot/Vote?par=0"
-
+	sendResponse(text);
+    let domain = "http://cvproof-prototype.azurewebsites.net";
+	let debugDomain = "http://localhost:14733"; // "/Ballot/VoteMessage?pubkey=" + encodeURIComponent("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCephujedoszQMrUxQqNydmiOgnh8CwnqNKK8RCuO5EhwmTGoEdVz4csncE+gIwQiXkmFlfoFek79lFJuaXseNQVwAYqkarcd4sPBqVv0BkBZnPZDInptxcae7EFDr8d7vWACuW2d2sweFKCre0V4CRUrsuHWi6uwyA30EJ2TDG0QIDAQAB") + "&msg="+ encodeURIComponent(text);
+	var url = domain + "/Ballot/VoteMessage?pubkey=" + encodeURIComponent(window.localStorage.getItem('pubkey')) + "&msg="+ encodeURIComponent(text);	
+	
 	var xhr = new XMLHttpRequest();
-
-	xhr.open("GET", debugurl);
+	xhr.open("GET", url);
 	xhr.onreadystatechange = function() {		
   		if (xhr.readyState == 4) {  
 			alert("onreadystatechange, readyState=" + xhr.readyState + ", responseText = " + xhr.responseText);	  				
 			let msg = text + '\n #returned \n' + xhr.responseText + '\n #returned';
-    		sendResponse(msg);
+    		//sendResponse(msg); 
   		}
 	}
 
