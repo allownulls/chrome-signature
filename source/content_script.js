@@ -35,7 +35,7 @@ function changeSelection() {
 		chrome.extension.sendRequest({'sign': selectedText}, 
 					function (text) {  								
 						if (text !== undefined){
-							alert('else:' + text);
+							//alert('else:' + text);
 							if (sel.rangeCount) {
 								range = sel.getRangeAt(0);
 								range.deleteContents();
