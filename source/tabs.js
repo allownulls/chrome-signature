@@ -4,8 +4,6 @@
  * found in the LICENSE file.
  */
 
-
-
 function sendKeyToAllTabs(keyStr) {
   chrome.windows.getAll({'populate': true}, function(windows) {
     for (var i = 0; i < windows.length; i++) {
