@@ -4,29 +4,42 @@
  * found in the LICENSE file.
  */
 
-function sendKeyToAllTabs(keyStr) {
+function sendNotarizeKeyToAllTabs(keyStr) {
   chrome.windows.getAll({'populate': true}, function(windows) {
     for (var i = 0; i < windows.length; i++) {
       var tabs = windows[i].tabs;
       for (var j = 0; j < tabs.length; j++) {
         chrome.tabs.sendRequest(
             tabs[j].id,
-            {'key': keyStr});
+            {'notarizeKey': keyStr});
       }
     }
   });
 }
 
-function loadContentScriptInAllTabs() {
+function sendCheckKeyToAllTabs(keyStr) {
   chrome.windows.getAll({'populate': true}, function(windows) {
     for (var i = 0; i < windows.length; i++) {
       var tabs = windows[i].tabs;
       for (var j = 0; j < tabs.length; j++) {
+        chrome.tabs.sendRequest(
+            tabs[j].id,
+            {'checkKey': keyStr});
+      }
+    }
+  });
+}
+
+function loadContentScriptInAllTabs() {  
+  chrome.windows.getAll({'populate': true}, function(windows) {
+    for (var i = 0; i < windows.length; i++) {
+      var tabs = windows[i].tabs;
+      for (var j = 0; j < tabs.length; j++) {        
         chrome.tabs.executeScript(
             tabs[j].id,
             {file: 'keycodes.js', allFrames: true},
 			_=>{ if (chrome.runtime.lastError !== undefined)  
-    				console.log(_, chrome.runtime.lastError) });
+            console.log(_, chrome.runtime.lastError) });        
         chrome.tabs.executeScript(
             tabs[j].id,
             {file: 'content_script.js', allFrames: true},

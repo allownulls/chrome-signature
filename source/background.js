@@ -1,5 +1,8 @@
-var lastSelection = '';
+var lastSignSelection = '';
+var lastCheckSelection = '';
 var globalUtteranceIndex = 0;
+//let domain = "http://cvproof-prototype.azurewebsites.net";	
+let domain = "http://localhost:14733";	
 
 if (localStorage['lastVersionUsed'] != '1') {
   localStorage['lastVersionUsed'] = '1';
@@ -9,33 +12,51 @@ if (localStorage['lastVersionUsed'] != '1') {
 }
 
 function sign(selection, sendResponse) {
-	if (selection == lastSelection) {
+	if (selection == lastSignSelection) {
 		return;
 	}
 	lastSelection = selection;
 
 	let pkey = "-----BEGIN RSA PRIVATE KEY-----\n" + window.localStorage.getItem('pkey') + "\n-----END RSA PRIVATE KEY-----";	
 	let signed = doSign(selection,pkey);	
-	let encodedText = selection + '\n \n #Fileproof \n' + signed + '\n #Fileproof';  
-
-	callApiVote(encodedText, sendResponse);
+	let encodedText = selection + '\n \n #Fileproof \n' + signed + '\n pubkey:' + window.localStorage.getItem('pubkey') + '\n #Fileproof';  
+	
+	sendResponse(encodedText);	
 }
 
-function callApiVote(text, sendResponse) 
-{
-	sendResponse(text);
-    let domain = "http://cvproof-prototype.azurewebsites.net";	
-	var url = domain + "/Ballot/VoteMessage?pubkey=" + encodeURIComponent(window.localStorage.getItem('pubkey')) + "&msg="+ encodeURIComponent(text);	
+function check(selection, sendResponse) {	
+	if (selection == lastCheckSelection) {
+		return;
+	}
+	lastSelection = selection;
+
+	//xxxx to add here:
+	//before checking the selection has to be parsed into following parts:
+	// 1. text
+	// 2. signature
+	// 3. key/id
+	// (todo: parse on client, check signature, send request to find a key)
+
+	callApiCheck(selection, sendResponse);
+}
+
+function callApiCheck(text, sendResponse) 
+{	    
+	var url = domain + "/Ballot/CheckMessage?msg="+ encodeURIComponent(text);
 	
+	//alert('sending request: ' + url);
+
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", url);
 	xhr.onreadystatechange = function() {		
   		if (xhr.readyState == 4) {  
-			alert("Vote sent! status: " + xhr.responseText);
+			resp = JSON.parse(xhr.response);
+			//alert("Check ok! \n check: " + resp.check + "\n status: " + resp.status);
+			sendResponse(xhr.response);
   		}
 	}
 
-	xhr.send();	
+	xhr.send();		
 }
 
 function doSign(message, key) {
@@ -47,25 +68,36 @@ function doSign(message, key) {
 }
 
 function initBackground() {
+	console.log('initbg');	
 	loadContentScriptInAllTabs();
 
-	var defaultKeyString = getDefaultKeyString();
-	var keyString = localStorage['signKey'];
-	if (keyString == undefined) {
-	keyString = defaultKeyString;
-	localStorage['signKey'] = keyString;
+	var notarizeKeyString = getNotarizeKeyString();		
+	if (localStorage['notarizeKey'] == undefined) {
+		localStorage['notarizeKey'] = notarizeKeyString;		
 	}
-	sendKeyToAllTabs(keyString);
+	
+	var checkKeyString = getCheckKeyString();
+	if (localStorage['checkKey'] == undefined) {
+		localStorage['checkKey'] = checkKeyString;	
+	}	
+
+	sendNotarizeKeyToAllTabs(notarizeKeyString);
+	sendCheckKeyToAllTabs(checkKeyString);
 
 	chrome.extension.onRequest.addListener(
 		function(request, sender, sendResponse) {		
-		if (request['init']) {			
-			sendResponse({'key': localStorage['signKey']});
-		} else if (request['sign']) {			
-			sign(request['sign'], sendResponse)		  
+			if (request['init']) {			
+				sendResponse({'notarizeKey': localStorage['notarizeKey'],'checkKey': localStorage['checkKey']});
+				//sendResponse({'checkKey': localStorage['checkKey']});
+			} else if (request['notarize']) {			
+				sign(request['notarize'], sendResponse)		  
+			}
+			else if (request['check']) {			
+				check(request['check'], sendResponse)		  
+			}
+			return true;
 		}
-		return true;
-		});
+	);
 
 	chrome.browserAction.onClicked.addListener(
 		function(tab) {
@@ -73,6 +105,8 @@ function initBackground() {
 			tab.id,
 			{'changeSelection': true});
 		});
+
+	//console.log('initbg-finish');	
 }
 
 initBackground();

@@ -84,9 +84,18 @@ function keyEventToString(evt) {
   return tokens.join('+');
 }
 
-function getDefaultKeyString() {
+function getNotarizeKeyString() {
   return keyEventToString({
     keyCode: 83,  // 's'
+    shiftKey: true,
+    altKey: true,
+    ctrlKey: true,
+    metaKey: false});
+}
+
+function getCheckKeyString() {
+  return keyEventToString({
+    keyCode: 67,  // 'c'
     shiftKey: true,
     altKey: true,
     ctrlKey: true,

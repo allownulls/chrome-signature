@@ -1,19 +1,19 @@
-var signKeyStr;
+var notarizeKeyStr;
+var checkKeyStr;
 var changeNo = 0;
 
-function doSign() {
-	var rsa = new RSAKey();
-	rsa.readPrivateKeyFromPEMString(document.form1.prvkey1.value);
-	var hashAlg = document.form1.hashalg.value;
-	var hSig = rsa.sign(document.form1.msgsigned.value, hashAlg);
-	document.form1.siggenerated.value = linebrk(hSig, 64);
-}
+// function doSign() {
+// 	var rsa = new RSAKey();
+// 	rsa.readPrivateKeyFromPEMString(document.form1.prvkey1.value);
+// 	var hashAlg = document.form1.hashalg.value;
+// 	var hSig = rsa.sign(document.form1.msgsigned.value, hashAlg);
+// 	document.form1.siggenerated.value = linebrk(hSig, 64);
+// }
 
-function changeSelection() {
+function changeSelection() {	
+	//console.log('sign');
 	var focused = document.activeElement;
 	var selectedText;
-	var newText;
-	//alert('elem:' + document.activeElement.innerHTML);
 	if (focused) {
 		try {
 			selectedText = focused.value.substring(
@@ -21,7 +21,7 @@ function changeSelection() {
 		} catch (err) {}
 
 		if (selectedText !== undefined)		
-			chrome.extension.sendRequest({'sign': selectedText}, 
+			chrome.extension.sendRequest({'notarize': selectedText}, 
 				function (text) {  								
 					if (text !== undefined){
 						focused.value = focused.value.replace(selectedText, text);
@@ -32,7 +32,7 @@ function changeSelection() {
 			var sel = window.getSelection();
 			var selectedText = sel.toString();
 
-			chrome.extension.sendRequest({'sign': selectedText}, 
+			chrome.extension.sendRequest({'notarize': selectedText}, 
 						function (text) {  								
 							if (text !== undefined){								
 								if (sel.rangeCount) {
@@ -47,28 +47,75 @@ function changeSelection() {
 	}	
 }
 
-function onExtensionMessage(request) {	
-  if (request['changeSelection'] != undefined) {
-    if (!document.hasFocus()) {
-      return;
-    }
-    changeSelection();
-  } else if (request['key'] != undefined) {
-    signKeyStr = request['key'];
-  }
+function checkSelection() {
+	//console.log('check');
+	var focused = document.activeElement;
+	var selectedText;
+	if (focused) {
+		try {
+			selectedText = focused.value.substring(
+				focused.selectionStart, focused.selectionEnd);
+		} catch (err) {}
+
+		if (selectedText !== undefined)		
+			chrome.extension.sendRequest({'check': selectedText}, 
+						function (response) {     //xxxx put result indication in this callback								
+							var resp = JSON.parse(response);
+							if (resp.check){ alert('Signature check passed!'); }
+							else { alert('Signature check failed!\n (Parsing status: ' + resp.status + ')'); }
+						}
+			)
+		else {	    
+			var sel = window.getSelection();
+			var selectedText = sel.toString();
+
+			chrome.extension.sendRequest({'check': selectedText}, 
+						function (response) {     //xxxx put result indication in this callback								
+							var resp = JSON.parse(response);
+							if (resp.check){ alert('Signature check passed!'); }
+							else { alert('Signature check failed!\n (Parsing status: ' + resp.status + ')'); }
+						}
+		);		
+		}
+	}	
 }
 
-function onKeyDown(evt) {	  	  
-    if (!document.hasFocus()) {
+function onExtensionMessage(request) {	  
+  if (request['changeSelection'] != undefined) {
+    if (!document.hasFocus()) return;    
+    //changeSelection();
+  } else if (request['notarizeKey'] != undefined && request['checkKey'] != undefined) 
+  {
+	notarizeKeyStr = request['notarizeKey'];
+	checkKeyStr = request['checkKey'];
+  } 
+      
+	//   alert('onExtensionMessage ( request[init]: ' + request['init'] + ' \n'
+	// 		  + 'request[notarizeKey]: ' + request['notarizeKey'] + ' \n' 
+	// 		  + 'request[checkKey]: ' + request['checkKey'] + ' \n'
+	//   		  + ')\n notarizeKeyStr: ' + notarizeKeyStr 
+	// 		  + '\n checkKeyStr: ' + checkKeyStr);
+}
+
+function onKeyDown(evt) {	  	  	
+	if (!document.hasFocus()) {
       return true;
     }
-    var keyStr = keyEventToString(evt);	
-    if (keyStr == signKeyStr && signKeyStr.length > 0) {		
-      changeSelection();
-      evt.stopPropagation();
-      evt.preventDefault();
-      return false;
-    }
+	var keyStr = keyEventToString(evt);		
+    if (keyStr == notarizeKeyStr && notarizeKeyStr.length > 0) {		
+		//alert('Keypressed: ' + keyStr);
+		changeSelection();
+		evt.stopPropagation();
+		evt.preventDefault();
+		return false;
+	}
+	if (keyStr == checkKeyStr && checkKeyStr.length > 0) {
+		//alert('Keypressed: ' + keyStr);
+		checkSelection();
+		evt.stopPropagation();
+		evt.preventDefault();
+		return false;
+	  }
     return true;
 }
 
@@ -97,10 +144,12 @@ function checkForNewIframe(doc) {
     setTimeout(checkForNewIframe, 250, doc); // <-- delay of 1/4 second
 }
 
-function initContentScript() {
+function initContentScript() {	
+	console.log('content-load');
 	chrome.extension.onRequest.addListener(onExtensionMessage);
 	chrome.extension.sendRequest({'init': true}, onExtensionMessage);
 	checkForNewIframe(document);
+	console.log('content-load-finish');
 }
 
 initContentScript();
