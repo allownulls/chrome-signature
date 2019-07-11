@@ -30,8 +30,9 @@ function changeSelection() {
 			)
 		else {	    
 			var sel = window.getSelection();
+			alert("sel: " + sel);
 			var selectedText = sel.toString();
-
+			alert("selText: " + selectedText);
 			chrome.extension.sendRequest({'notarize': selectedText}, 
 						function (text) {  								
 							if (text !== undefined){								
@@ -61,8 +62,8 @@ function checkSelection() {
 			chrome.extension.sendRequest({'check': selectedText}, 
 						function (response) {     //xxxx put result indication in this callback								
 							var resp = JSON.parse(response);
-							if (resp.check){ alert('Signature check passed!'); }
-							else { alert('Signature check failed!\n (Parsing status: ' + resp.status + ')'); }
+							if (resp.check){ alert('Validation passed!'); }
+							else { alert('Validity check failed!\n (Parsing status: ' + resp.status + ')'); }
 						}
 			)
 		else {	    
@@ -72,8 +73,8 @@ function checkSelection() {
 			chrome.extension.sendRequest({'check': selectedText}, 
 						function (response) {     //xxxx put result indication in this callback								
 							var resp = JSON.parse(response);
-							if (resp.check){ alert('Signature check passed!'); }
-							else { alert('Signature check failed!\n (Parsing status: ' + resp.status + ')'); }
+							if (resp.check){ alert('Validation passed!'); }
+							else { alert('Validity check failed!\n (Parsing status: ' + resp.status + ')'); }
 						}
 		);		
 		}

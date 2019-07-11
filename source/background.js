@@ -21,7 +21,7 @@ function sign(selection, sendResponse) {
 	let signed = doSign(selection,pkey);	
 	let encodedText = selection + '\n \n #Fileproof \n' + signed + '\n pubkey:' + window.localStorage.getItem('pubkey') + '\n #Fileproof';  
 	
-	sendResponse(encodedText);	
+	callApiSign(encodedText, sendResponse);	
 }
 
 function check(selection, sendResponse) {	
@@ -50,13 +50,32 @@ function callApiCheck(text, sendResponse)
 	xhr.open("GET", url);
 	xhr.onreadystatechange = function() {		
   		if (xhr.readyState == 4) {  
-			resp = JSON.parse(xhr.response);
+			//resp = JSON.parse(xhr.response);
 			//alert("Check ok! \n check: " + resp.check + "\n status: " + resp.status);
+
+			
 			sendResponse(xhr.response);
   		}
 	}
 
 	xhr.send();		
+}
+
+function callApiSign(text, sendResponse) 
+{	
+	var url = domain + "/Ballot/SignMessage?pubkey=" + encodeURIComponent(window.localStorage.getItem('pubkey')) + "&msg="+ encodeURIComponent(text);	
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", url);
+	xhr.onreadystatechange = function() {		
+  		if (xhr.readyState == 4) {			  
+			var resp = JSON.parse(xhr.response);
+		    //alert("Check ok! \n sign: " + resp.signed + "\n status: " + resp.status);						
+    		sendResponse(resp.signed);
+  		}
+	}
+
+	xhr.send();	
 }
 
 function doSign(message, key) {
