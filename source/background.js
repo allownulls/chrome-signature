@@ -1,8 +1,8 @@
 var lastSignSelection = '';
 var lastCheckSelection = '';
 var globalUtteranceIndex = 0;
-//let domain = "http://cvproof-prototype.azurewebsites.net";	
-let domain = "http://localhost:14733";	
+let domain = "http://cvproof-prototype.azurewebsites.net";	
+//let domain = "http://localhost:14733";	
 
 if (localStorage['lastVersionUsed'] != '1') {
   localStorage['lastVersionUsed'] = '1';
@@ -19,7 +19,7 @@ function sign(selection, sendResponse) {
 
 	let pkey = "-----BEGIN RSA PRIVATE KEY-----\n" + window.localStorage.getItem('pkey') + "\n-----END RSA PRIVATE KEY-----";	
 	let signed = doSign(selection,pkey);	
-	let encodedText = selection + '\n \n #Fileproof \n' + signed + '\n pubkey:' + window.localStorage.getItem('pubkey') + '\n #Fileproof';  
+	let encodedText = selection + '#Fileproof\n' + signed + '\npubkey:' + window.localStorage.getItem('pubkey') + '\n#Fileproof';  
 	
 	callApiSign(encodedText, sendResponse);	
 }
@@ -42,40 +42,40 @@ function check(selection, sendResponse) {
 
 function callApiCheck(text, sendResponse) 
 {	    
-	var url = domain + "/Ballot/CheckMessage?msg="+ encodeURIComponent(text);
-	
-	//alert('sending request: ' + url);
+	var url = domain + '/Ballot/CheckMessage';
+	var param = 'msg='+ encodeURIComponent(text);	
 
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET", url);
+	xhr.open("POST", url);
+	xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');	
 	xhr.onreadystatechange = function() {		
   		if (xhr.readyState == 4) {  
 			//resp = JSON.parse(xhr.response);
-			//alert("Check ok! \n check: " + resp.check + "\n status: " + resp.status);
-
-			
+			//alert("Check ok! \n check: " + resp.check + "\n status: " + resp.status);			
 			sendResponse(xhr.response);
   		}
 	}
 
-	xhr.send();		
+	xhr.send(param);		
 }
 
 function callApiSign(text, sendResponse) 
 {	
-	var url = domain + "/Ballot/SignMessage?pubkey=" + encodeURIComponent(window.localStorage.getItem('pubkey')) + "&msg="+ encodeURIComponent(text);	
+	var url = domain + "/Ballot/SignMessage";
+	var param = 'pubkey=' + encodeURIComponent(window.localStorage.getItem('pubkey')) 
+			  + '&msg='+ encodeURIComponent(text);
 	
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", url);
+	var xhr = new XMLHttpRequest();	
+	xhr.open("POST", url);
+	xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');	
 	xhr.onreadystatechange = function() {		
   		if (xhr.readyState == 4) {			  
-			var resp = JSON.parse(xhr.response);
-		    //alert("Check ok! \n sign: " + resp.signed + "\n status: " + resp.status);						
+			var resp = JSON.parse(xhr.response);		    
     		sendResponse(resp.signed);
   		}
 	}
 
-	xhr.send();	
+	xhr.send(param);
 }
 
 function doSign(message, key) {

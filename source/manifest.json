@@ -2,24 +2,28 @@
 	"manifest_version": 2,
 	"name": "CVProof fingerprint",
 	"description": "This extension signs message and sends voting to CVProof service",
-	"version": "0.90",
+	"version": "0.92",
+	"minimum_chrome_version": "46",	
 	"options_page": "options.html",
 	"options_ui": {
 		"page": "options.html",
 		"open_in_tab": false
-	},
+	},	
 	"background": {
 	"scripts": [
 		"keycodes.js",
 		"tabs.js",
 		"background.js",
-		"jsrsasign-all-min.js"
+		"jsrsasign-all-min.js",
+		"jquery-1.9.1.min.js",
+		"pop.js"		
 	]
 	},
 
 	"browser_action": {
 	"default_icon": "cvproof-finger.png",
-	"default_title": "CVProof fingerprint"
+	"default_title": "CVProof fingerprint",	
+	"default_popup": "pop.html"
 	},
 	"permissions": [
 		"<all_urls>",

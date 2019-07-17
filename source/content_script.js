@@ -11,7 +11,7 @@ var changeNo = 0;
 // }
 
 function changeSelection() {	
-	//console.log('sign');
+	//console.log('sign');	
 	var focused = document.activeElement;
 	var selectedText;
 	if (focused) {
@@ -30,9 +30,9 @@ function changeSelection() {
 			)
 		else {	    
 			var sel = window.getSelection();
-			alert("sel: " + sel);
+			//"sel: " + sel);
 			var selectedText = sel.toString();
-			alert("selText: " + selectedText);
+			//alert("selText: " + selectedText);
 			chrome.extension.sendRequest({'notarize': selectedText}, 
 						function (text) {  								
 							if (text !== undefined){								
@@ -49,6 +49,7 @@ function changeSelection() {
 }
 
 function checkSelection() {
+	//alert('check!');
 	//console.log('check');
 	var focused = document.activeElement;
 	var selectedText;
@@ -62,7 +63,7 @@ function checkSelection() {
 			chrome.extension.sendRequest({'check': selectedText}, 
 						function (response) {     //xxxx put result indication in this callback								
 							var resp = JSON.parse(response);
-							if (resp.check){ alert('Validation passed!'); }
+							if (resp.check){ alert('Validation passed!\nSigned by: '+ resp.user); }
 							else { alert('Validity check failed!\n (Parsing status: ' + resp.status + ')'); }
 						}
 			)
@@ -73,7 +74,7 @@ function checkSelection() {
 			chrome.extension.sendRequest({'check': selectedText}, 
 						function (response) {     //xxxx put result indication in this callback								
 							var resp = JSON.parse(response);
-							if (resp.check){ alert('Validation passed!'); }
+							if (resp.check){ alert('Validation passed!\nSigned by: '+ resp.user); }
 							else { alert('Validity check failed!\n (Parsing status: ' + resp.status + ')'); }
 						}
 		);		
@@ -120,6 +121,11 @@ function onKeyDown(evt) {
     return true;
 }
 
+function onClickIcon()
+{
+	chrome.windows.create({'url': 'pop.html', 'type': 'popup'}, function(window) {});
+}
+
 function checkForNewIframe(doc) {
     if (!doc) return; // document does not exist.
 
@@ -146,11 +152,12 @@ function checkForNewIframe(doc) {
 }
 
 function initContentScript() {	
-	console.log('content-load');
+	//console.log('content-load');		
 	chrome.extension.onRequest.addListener(onExtensionMessage);
 	chrome.extension.sendRequest({'init': true}, onExtensionMessage);
 	checkForNewIframe(document);
-	console.log('content-load-finish');
+	//chrome.browserAction.onClicked.addListener(onClickIcon);
+	//console.log('content-load-finish');
 }
 
 initContentScript();
