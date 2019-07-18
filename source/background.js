@@ -1,7 +1,8 @@
 var lastSignSelection = '';
 var lastCheckSelection = '';
 var globalUtteranceIndex = 0;
-let domain = "http://cvproof-prototype.azurewebsites.net";	
+//let domain = "http://cvproof-prototype.azurewebsites.net";
+let domain = "http://domino-vote.azurewebsites.net"
 //let domain = "http://localhost:14733";	
 
 if (localStorage['lastVersionUsed'] != '1') {

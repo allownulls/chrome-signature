@@ -6,21 +6,26 @@
 	<link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css">	
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 </head>
-<body>
-	<label>
-		<input type="text" id="pkey">
-		Private key
-	</label>
-	<br/><br/>
-	<label>
-		<input type="text" id="pubkey">
-		Public key
-	</label>
-	<br/>
-	<div id="status">&nbsp;</div>
-	<br/>
-	<button id="save">Save</button>
+<body style="width:600px;margin:0px 0px 0px 10px;">
+		<div class="container body-content">
+			<div style="margin:0px 0px 20px 0px;"><h2>Settings</h2></div>
+	
+			<div class="container-fluid">
+				<div class="form-group">
+					<label> Private key	</label>
+					<input class="form-control" type="text" id="pkey">
+				</div>
+				<div class="form-group">
+					<label>Public key</label>	
+					<input class="form-control" type="text" id="pubkey">
+				</div>
+				<div id="status" style="margin: 10px 0px 10px 0px">&nbsp;</div>
 
+				<button id="save" class="btn btn-default">Save</button>
+			</div>
+			<hr>
+			<footer><p>© 2019 - CVProof.Web</p></footer>
+		</div>
 	<script src="options.js"></script>
 </body>
 </html>
