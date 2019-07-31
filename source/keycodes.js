@@ -87,7 +87,7 @@ function keyEventToString(evt) {
 function getNotarizeKeyString() {
   return keyEventToString({
     keyCode: 83,  // 's'
-    shiftKey: true,
+    shiftKey: false,
     altKey: true,
     ctrlKey: true,
     metaKey: false});
@@ -96,7 +96,7 @@ function getNotarizeKeyString() {
 function getCheckKeyString() {
   return keyEventToString({
     keyCode: 67,  // 'c'
-    shiftKey: true,
+    shiftKey: false,
     altKey: true,
     ctrlKey: true,
     metaKey: false});

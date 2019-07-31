@@ -2,7 +2,7 @@ var lastSignSelection = '';
 var lastCheckSelection = '';
 var globalUtteranceIndex = 0;
 //let domain = "http://cvproof-prototype.azurewebsites.net";
-let domain = "http://domino-vote.azurewebsites.net"
+let domain = "http://cvproof-signature.azurewebsites.net"
 //let domain = "http://localhost:14733";	
 
 if (localStorage['lastVersionUsed'] != '1') {
@@ -43,7 +43,7 @@ function check(selection, sendResponse) {
 
 function callApiCheck(text, sendResponse) 
 {	    
-	var url = domain + '/Ballot/CheckMessage';
+	var url = domain + '/FingerprintApi/CheckMessage';
 	var param = 'msg='+ encodeURIComponent(text);	
 
 	var xhr = new XMLHttpRequest();
@@ -62,7 +62,7 @@ function callApiCheck(text, sendResponse)
 
 function callApiSign(text, sendResponse) 
 {	
-	var url = domain + "/Ballot/SignMessage";
+	var url = domain + "/FingerprintApi/SignMessage";
 	var param = 'pubkey=' + encodeURIComponent(window.localStorage.getItem('pubkey')) 
 			  + '&msg='+ encodeURIComponent(text);
 	
