@@ -41,6 +41,7 @@
 		"<all_urls>",
 		"tts",
 		"tabs",
-		"storage"
+		"storage",
+		"notifications"
 	]
 }

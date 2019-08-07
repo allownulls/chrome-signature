@@ -54,6 +54,27 @@ function callApiCheck(text, sendResponse)
 			//resp = JSON.parse(xhr.response);
 			//alert("Check ok! \n check: " + resp.check + "\n status: " + resp.status);			
 			sendResponse(xhr.response);
+			
+			var resp = JSON.parse(xhr.response);
+			var respMsg = "";                    
+
+			if (resp.check) { 
+				respMsg = 'Validation passed!\nSigned by: ' + resp.user
+					+ '\nEmail: ' + resp.email
+					+ '\nPublic key: ' + resp.publickey
+					+ '\nSignature: ' + resp.signature;																	
+			}
+			else 
+				respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');
+
+			var opt = {
+				type: "basic",
+				title: "Verifying signature...",
+				message: respMsg,
+				iconUrl: "cvproof-finger.png"
+			};			
+
+			chrome.notifications.create('Verification', opt, function() {});		
   		}
 	}
 

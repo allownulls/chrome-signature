@@ -63,8 +63,18 @@ function checkSelection() {
 			chrome.extension.sendRequest({'check': selectedText}, 
 						function (response) {     //xxxx put result indication in this callback								
 							var resp = JSON.parse(response);
-							if (resp.check){ alert('Validation passed!\nSigned by: '+ resp.user); }
-							else { alert('Validity check failed!\n (Parsing status: ' + resp.status + ')'); }
+							var respMsg = "";                    
+		
+							if (resp.check) { 
+								respMsg = 'Validation passed!\nSigned by: ' + resp.user
+									+ '\nEmail: ' + resp.email
+									+ '\nPublic key: ' + resp.publickey
+									+ '\nSignature: ' + resp.signature;																	
+							}
+							else 
+								respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');
+		
+//							alert(respMsg);														
 						}
 			)
 		else {	    
