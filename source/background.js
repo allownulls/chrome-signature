@@ -59,22 +59,33 @@ function callApiCheck(text, sendResponse)
 			var respMsg = "";                    
 
 			if (resp.check) { 
-				respMsg = 'Validation passed!\nSigned by: ' + resp.user
-					+ '\nEmail: ' + resp.email
-					+ '\nPublic key: ' + resp.publickey
-					+ '\nSignature: ' + resp.signature;																	
+				respMsg = 'Validation passed!\nSigned by: ' + resp.user;
+				if (resp.email !== null)	
+					respMsg += '\nEmail: ' + resp.email;
+				//+ '\nPublic key: ' + resp.publickey
+				//+ '\nSignature: ' + resp.signature;																	
 			}
 			else 
 				respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');
 
-			var opt = {
-				type: "basic",
-				title: "Verifying signature...",
-				message: respMsg,
-				iconUrl: "cvproof-finger.png"
-			};			
+			doNotify('Signature Verification', respMsg);
 
-			chrome.notifications.create('Verification', opt, function() {});		
+			// var opt = {
+			// 	type: "basic",
+			// 	title: "Verifying signature...",
+			// 	message: respMsg,
+			// 	iconUrl: "cvproof-finger.png"
+			// };			
+
+			// chrome.notifications.create('Verification', opt, function() {});		
+
+			// create notification using forumUrl as id
+			//chrome.notifications.create(forumUrl, options, function(notificationId){ }); 
+
+			// create a on Click listener for notifications
+			// chrome.notifications.onClicked.addListener(function(notificationId) {
+			//   chrome.tabs.create({url: notificationId});
+			// });  
   		}
 	}
 
@@ -93,7 +104,11 @@ function callApiSign(text, sendResponse)
 	xhr.onreadystatechange = function() {		
   		if (xhr.readyState == 4) {			  
 			var resp = JSON.parse(xhr.response);		    
-    		sendResponse(resp.signed);
+			sendResponse(resp.signed);
+			respMsg = '\nSigned by: ' + resp.user;
+			if (resp.email !== null)	
+				respMsg += '\nEmail: ' + resp.email;
+			doNotify("Message signed!", respMsg);
   		}
 	}
 
@@ -107,6 +122,33 @@ function doSign(message, key) {
 	var hSig = rsa.sign(message, hashAlg);
 	return linebrk(hSig, 64);
 }
+
+function doNotify (title, msg) {
+	if (!Notify.needsPermission) {
+		notification(title, msg);
+	} else if (Notify.isSupported()) {
+		Notify.requestPermission(onPermissionGranted, onPermissionDenied);
+	}
+}
+
+function onClickNotification () {
+	var signerUrl = 'http://cvproof-signature.azurewebsites.net/Signature/Signer';
+	chrome.tabs.create({url: signerUrl});
+}
+
+function notification(title, msg){
+	var myNotification = new Notify(title, {
+		body: msg,		
+		timeout: 10,
+		notifyClick: onClickNotification
+		// ,notifyShow: onShowNotification,
+		// notifyClose: onCloseNotification,		
+		// notifyError: onErrorNotification,
+	});
+
+	myNotification.show();
+}
+
 
 function initBackground() {
 	console.log('initbg');	
