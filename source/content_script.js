@@ -10,7 +10,53 @@ var changeNo = 0;
 // 	document.form1.siggenerated.value = linebrk(hSig, 64);
 // }
 
-function changeSelection() {	
+// function changeSelectionPage() {	
+// 	//console.log('sign');	
+// 	var focused = document.activeElement;
+// 	var selectedText;
+// 	if (focused) {
+// 		try {
+// 			selectedText = focused.value.substring(
+// 				focused.selectionStart, focused.selectionEnd);
+// 		} catch (err) {}
+
+// 		if (selectedText !== undefined)		
+// 			chrome.extension.sendRequest({'notarize': selectedText}, 
+// 				function (text) {  								
+// 					if (text !== undefined){
+// 						focused.value = focused.value.replace(selectedText, text);
+// 					}				
+// 				}
+// 			)
+// 		else {	    
+// 			var sel = window.getSelection();
+// 			//"sel: " + sel);
+// 			var selectedText = sel.toString();
+// 			//alert("selText: " + selectedText);
+// 			chrome.extension.sendRequest({'notarize': selectedText}, 
+// 						function (text) {  								
+// 							if (text !== undefined){								
+// 								if (sel.rangeCount) {
+// 									range = sel.getRangeAt(0);
+// 									range.deleteContents();
+// 									range.insertNode(document.createTextNode(text));
+// 								}							
+// 							}				
+// 						}
+// 					);		
+// 		}
+// 	}	
+// }
+function textToClipboard (text) {
+    var dummy = document.createElement("textarea");
+    document.body.appendChild(dummy);
+    dummy.value = text;
+    dummy.select();
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
+}
+
+function changeSelectionClip() {	
 	//console.log('sign');	
 	var focused = document.activeElement;
 	var selectedText;
@@ -24,7 +70,8 @@ function changeSelection() {
 			chrome.extension.sendRequest({'notarize': selectedText}, 
 				function (text) {  								
 					if (text !== undefined){
-						focused.value = focused.value.replace(selectedText, text);
+						//focused.value = focused.value.replace(selectedText, text);
+						textToClipboard(text);
 					}				
 				}
 			)
@@ -36,11 +83,12 @@ function changeSelection() {
 			chrome.extension.sendRequest({'notarize': selectedText}, 
 						function (text) {  								
 							if (text !== undefined){								
-								if (sel.rangeCount) {
-									range = sel.getRangeAt(0);
-									range.deleteContents();
-									range.insertNode(document.createTextNode(text));
-								}							
+								// if (sel.rangeCount) {
+								// 	range = sel.getRangeAt(0);
+								// 	range.deleteContents();
+								// 	range.insertNode(document.createTextNode(text));
+								// }
+								textToClipboard(text);							
 							}				
 						}
 					);		
@@ -95,9 +143,8 @@ function checkSelection() {
 }
 
 function onExtensionMessage(request) {	  
-  if (request['changeSelection'] != undefined) {
-    if (!document.hasFocus()) return;    
-    //changeSelection();
+  if (request['changeSelectionClip'] != undefined) {
+    if (!document.hasFocus()) return;        
   } else if (request['notarizeKey'] != undefined && request['checkKey'] != undefined) 
   {
 	notarizeKeyStr = request['notarizeKey'];
@@ -118,7 +165,7 @@ function onKeyDown(evt) {
 	var keyStr = keyEventToString(evt);		
     if (keyStr == notarizeKeyStr && notarizeKeyStr.length > 0) {		
 		//alert('Keypressed: ' + keyStr);
-		changeSelection();
+		changeSelectionClip();
 		evt.stopPropagation();
 		evt.preventDefault();
 		return false;

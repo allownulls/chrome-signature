@@ -108,7 +108,8 @@ function callApiSign(text, sendResponse)
 			respMsg = '\nSigned by: ' + resp.user;
 			if (resp.email !== null)	
 				respMsg += '\nEmail: ' + resp.email;
-			doNotify("Message signed!", respMsg);
+			respMsg += '\nUse Ctrl + V to paste signed text from clipboard';
+			doNotify("Message ", respMsg);
   		}
 	}
 
@@ -186,7 +187,7 @@ function initBackground() {
 		function(tab) {
 		chrome.tabs.sendRequest(
 			tab.id,
-			{'changeSelection': true});
+			{'changeSelectionClip': true});
 		});
 
 	//console.log('initbg-finish');	
