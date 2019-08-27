@@ -1,6 +1,6 @@
 <html><head>
     <meta charset="utf-8">	
-    <title>CVProof.Fingerprint</title>	
+    <title>Fileproof.Fingerprint</title>	
 	<link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css">	
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 </head>
@@ -8,21 +8,20 @@
     <div class="container body-content">
 		<h2 style="margin:20px 20px 0px 0px;display:inline">Sign Message</h2>
 		<br />
-
 		<div class="container-fluid">
 			<div>        
-				<form action="http://cvproof-prototype.azurewebsites.net/Signature/Signer" method="post">        
+				<form action="http://cvproof-signature.azurewebsites.net/Signature/Signer" method="post">        
 					<h3 style="margin:20px 0px 20px 0px">Paste plain text</h3>
 					<textarea class="form-control" cols="200" id="Message" name="Message" rows="10"></textarea>        
 					<br>
-					<input type="button" id="sendBtn" value="Sign" class="btn btn-default">
-					<input type="button" id="checkBtn" value="Verify" class="btn btn-default" style="margin-left:10px;">
+					<button id="sendBtn" class="btn btn-default">&nbsp;&nbsp;Sign&nbsp;&nbsp;</button>
+					<button id="checkBtn" class="btn btn-default" style="margin-left:10px;">&nbsp;&nbsp;Verify&nbsp;&nbsp;</button>
 				</form>    
 			</div>
 		</div>
 		<hr>
 		<footer>
-			<p>© 2019 - CVProof.Web</p>
+			<p>© 2019 - FileProof.Web</p>
 		</footer>
 	</div>	
 	<script type="text/javascript" src="jquery-1.9.1.min.js"></script>

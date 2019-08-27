@@ -60,6 +60,8 @@ function callApiCheck(text, sendResponse)
 
 			if (resp.check) { 
 				respMsg = 'Validation passed!\nSigned by: ' + resp.user;
+				// if (resp.publickey !== null)	
+				// 	respMsg += '\nPublic key: ' + resp.publickey;
 				if (resp.email !== null)	
 					respMsg += '\nEmail: ' + resp.email;
 				//+ '\nPublic key: ' + resp.publickey
@@ -68,7 +70,7 @@ function callApiCheck(text, sendResponse)
 			else 
 				respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');
 
-			doNotify('Signature Verification', respMsg);
+			doNotify('Signature Verification', respMsg, resp.publickey);
 
 			// var opt = {
 			// 	type: "basic",
@@ -106,10 +108,12 @@ function callApiSign(text, sendResponse)
 			var resp = JSON.parse(xhr.response);		    
 			sendResponse(resp.signed);
 			respMsg = '\nSigned by: ' + resp.user;
+			// if (resp.publickey !== null)	
+			// 	respMsg += '\nPublic key: ' + resp.publickey;
 			if (resp.email !== null)	
 				respMsg += '\nEmail: ' + resp.email;
-			respMsg += '\nUse Ctrl + V to paste signed text from clipboard';
-			doNotify("Message ", respMsg);
+			respMsg += '\nUse Ctrl + V to paste signed text from clipboard';			
+			doNotify("Message ", respMsg, resp.publickey);
   		}
 	}
 
@@ -124,35 +128,54 @@ function doSign(message, key) {
 	return linebrk(hSig, 64);
 }
 
-function doNotify (title, msg) {
+function doNotify(title, msg, profile) {		
 	if (!Notify.needsPermission) {
-		notification(title, msg);
+		notification(title, msg, profile);
 	} else if (Notify.isSupported()) {
 		Notify.requestPermission(onPermissionGranted, onPermissionDenied);
 	}
 }
 
-function onClickNotification () {
-	var signerUrl = 'http://cvproof-signature.azurewebsites.net/Signature/Signer';
+function onClickNotification(profile) {
+	//alert('Profile: ' + profile);
+	//alert('signerURL' + signerUrl);
+	var signerUrl = domain + '/Profile/ProfileView?id=' + encodeURIComponent(profile);
+	
 	chrome.tabs.create({url: signerUrl});
 }
 
-function notification(title, msg){
-	var myNotification = new Notify(title, {
-		body: msg,		
-		timeout: 10,
-		notifyClick: onClickNotification
-		// ,notifyShow: onShowNotification,
-		// notifyClose: onCloseNotification,		
-		// notifyError: onErrorNotification,
-	});
+function notification(title, msg, profile){	
+	var myNotification;
+
+	if (profile != null && profile != '')
+	{
+		//alert(profile);
+		myNotification = new Notify(title, {
+			body: msg,		
+			timeout: 10,
+			notifyClick: function() {onClickNotification(profile)}
+			// ,notifyShow: onShowNotification,
+			// notifyClose: onCloseNotification,		
+			// notifyError: onErrorNotification,
+		})
+	}
+	else
+	{
+		//alert('Null!');
+		myNotification = new Notify(title, {
+			body: msg,		
+			timeout: 10		
+		});
+	};
 
 	myNotification.show();
 }
 
 
+
+
 function initBackground() {
-	console.log('initbg');	
+	//console.log('initbg');	
 	loadContentScriptInAllTabs();
 
 	var notarizeKeyString = getNotarizeKeyString();		

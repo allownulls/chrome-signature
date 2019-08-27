@@ -48,12 +48,19 @@ var changeNo = 0;
 // 	}	
 // }
 function textToClipboard (text) {
-    var dummy = document.createElement("textarea");
-    document.body.appendChild(dummy);
-    dummy.value = text;
-    dummy.select();
-    document.execCommand("copy");
-    document.body.removeChild(dummy);
+	if (window.location.protocol === 'https:')
+    {
+		navigator.clipboard.writeText(text);
+	}
+	else 
+	{
+        var dummy = document.createElement("textarea");
+        document.body.appendChild(dummy);
+        dummy.value = text;
+        dummy.select();
+	    document.execCommand("copy");	
+		document.body.removeChild(dummy);
+	}	
 }
 
 function changeSelectionClip() {	

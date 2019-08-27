@@ -6,10 +6,10 @@ function save_options() {
   window.localStorage.setItem('pubkey', pubkey);
   
   var status = document.getElementById('status');
-  status.textContent = 'Options saved.';
+  status.textContent = 'Options saved. You can start using Fileproof signature.';
   setTimeout(function() {
       status.innerHTML = '&nbsp;';
-  }, 750);
+  }, 7500);
 }
 
 // Restores select box and checkbox state using the preferences

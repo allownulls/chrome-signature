@@ -1,9 +1,9 @@
 {
 	"manifest_version": 2,
-	"name": "CVProof fingerprint",
-	"description": "This extension signs message and sends voting to CVProof service",
-	"version": "0.96",
-	"minimum_chrome_version": "46",	
+	"name": "FileProof signature",
+	"description": "This extension signs text messages with FileProof service",
+	"version": "0.99",
+	"minimum_chrome_version": "66",	
 	"options_page": "options.html",
 	"options_ui": {
 		"page": "options.html",
@@ -35,7 +35,7 @@
 
 	"browser_action": {
 	"default_icon": "cvproof-finger.png",
-	"default_title": "CVProof fingerprint",	
+	"default_title": "Fileproof fingerprint",	
 	"default_popup": "pop.html"
 	},
 	"permissions": [
