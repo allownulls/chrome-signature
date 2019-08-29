@@ -70,7 +70,7 @@ function callApiCheck(text, sendResponse)
 			else 
 				respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');
 
-			doNotify('Signature Verification', respMsg, resp.publickey);
+			doNotify('Signature Verification', respMsg, resp.msgid);
 
 			// var opt = {
 			// 	type: "basic",
@@ -113,7 +113,7 @@ function callApiSign(text, sendResponse)
 			if (resp.email !== null)	
 				respMsg += '\nEmail: ' + resp.email;
 			respMsg += '\nUse Ctrl + V to paste signed text from clipboard';			
-			doNotify("Message ", respMsg, resp.publickey);
+			doNotify("Message ", respMsg, resp.msgid);
   		}
 	}
 
@@ -128,32 +128,32 @@ function doSign(message, key) {
 	return linebrk(hSig, 64);
 }
 
-function doNotify(title, msg, profile) {		
+function doNotify(title, msg, link) {		
 	if (!Notify.needsPermission) {
-		notification(title, msg, profile);
+		notification(title, msg, link);
 	} else if (Notify.isSupported()) {
 		Notify.requestPermission(onPermissionGranted, onPermissionDenied);
 	}
 }
 
-function onClickNotification(profile) {
+function onClickNotification(link) {
 	//alert('Profile: ' + profile);
 	//alert('signerURL' + signerUrl);
-	var signerUrl = domain + '/Profile/ProfileView?id=' + encodeURIComponent(profile);
+	var signerUrl = domain + '/Profile/ProfileView?id=' + encodeURIComponent(link);
 	
 	chrome.tabs.create({url: signerUrl});
 }
 
-function notification(title, msg, profile){	
+function notification(title, msg, link){	
 	var myNotification;
 
-	if (profile != null && profile != '')
+	if (link != null && link != '')
 	{
 		//alert(profile);
 		myNotification = new Notify(title, {
 			body: msg,		
 			timeout: 10,
-			notifyClick: function() {onClickNotification(profile)}
+			notifyClick: function() {onClickNotification(link)}
 			// ,notifyShow: onShowNotification,
 			// notifyClose: onCloseNotification,		
 			// notifyError: onErrorNotification,

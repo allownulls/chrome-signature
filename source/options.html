@@ -12,6 +12,18 @@
 	
 			<div class="container-fluid">
 				<div class="form-group">
+					<label> Name </label>
+					<input class="form-control" type="text" id="name">
+				</div>
+				<div class="form-group">
+					<label> Email </label>
+					<input class="form-control" type="text" id="email">
+				</div>
+				<div class="form-group">
+						<label> PIN </label>
+						<input class="form-control" type="text" id="pin">
+				</div>	
+				<div class="form-group">
 					<label> Private key	</label>
 					<input class="form-control" type="text" id="pkey">
 				</div>
@@ -20,12 +32,14 @@
 					<input class="form-control" type="text" id="pubkey">
 				</div>
 				<div id="status" style="margin: 10px 0px 10px 0px">&nbsp;</div>
-
-				<button id="save" class="btn btn-default">Save</button>
+				<div id="keyGenerateButton" style="clear:both; margin-top:10px">
+					<button id="generate" class="btn btn-default">Generate keys & save</button>
+				</div>				
 			</div>
 			<hr>
 			<footer><p>© 2019 - FileProof.Web</p></footer>
 		</div>
-	<script src="options.js"></script>
+		<script src="jsrsasign-all-min.js"></script>
+		<script src="options.js"></script>	
 </body>
 </html>
