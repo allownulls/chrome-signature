@@ -8,12 +8,13 @@ function saveOptions() {
 
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
-function restoreOptions() {  
+function restoreOptions() {    
   document.getElementById('name').value = window.localStorage.getItem('name');
   document.getElementById('email').value = window.localStorage.getItem('email');
   document.getElementById('pin').value = window.localStorage.getItem('pin');
   document.getElementById('pkey').value = window.localStorage.getItem('pkey');
-	document.getElementById('pubkey').value = window.localStorage.getItem('pubkey');
+  document.getElementById('pubkey').value = window.localStorage.getItem('pubkey');
+  updateControls();
 }
 
 function generateKeys() {
@@ -60,7 +61,9 @@ function register()
           window.localStorage.setItem('pin', document.getElementById('pin').value);
          
           var status = document.getElementById('status');
-          status.textContent = 'Options saved. You can start using Fileproof signature.';
+          status.textContent = 'Options saved. Close this tab and start using Fileproof signature!';
+
+          updateControls();
         
           // setTimeout(function() {
           //     status.innerHTML = '&nbsp;';
@@ -76,18 +79,18 @@ function register()
 
 function profileSealed()
 {
-  return (document.getElementById('pkey').value != ""
-      && document.getElementById('pkey').value != null);
+  var ret = document.getElementById('pkey').value != ""
+            && document.getElementById('pkey').value != null;    
+  return ret;
 
 }
 
 function updateControls()
 {
-    document.addEventListener('DOMContentLoaded', restoreOptions);
-    
     if (profileSealed())
     {
-      document.getElementById('generate').disabled = true;      
+      document.getElementById('generate').disabled = true;
+      document.getElementById('pin').disabled = true;      
     }
     else
     {          
@@ -95,4 +98,6 @@ function updateControls()
     }
 }
 
-updateControls();
+document.addEventListener('DOMContentLoaded', restoreOptions);
+
+

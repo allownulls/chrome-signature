@@ -1,7 +1,6 @@
 var lastSignSelection = '';
 var lastCheckSelection = '';
 var globalUtteranceIndex = 0;
-//let domain = "http://cvproof-prototype.azurewebsites.net";
 let domain = "http://cvproof-signature.azurewebsites.net"
 //let domain = "http://localhost:14733";	
 
@@ -62,13 +61,14 @@ function callApiCheck(text, sendResponse)
 				respMsg = 'Validation passed!\nSigned by: ' + resp.user;
 				// if (resp.publickey !== null)	
 				// 	respMsg += '\nPublic key: ' + resp.publickey;
-				if (resp.email !== null)	
-					respMsg += '\nEmail: ' + resp.email;
+				// if (resp.email !== null)	
+				// 	respMsg += '\nEmail: ' + resp.email;
+			    respMsg += '\nClick to see the details';
 				//+ '\nPublic key: ' + resp.publickey
 				//+ '\nSignature: ' + resp.signature;																	
 			}
 			else 
-				respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');
+				respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');				
 
 			doNotify('Signature Verification', respMsg, resp.msgid);
 
@@ -110,9 +110,10 @@ function callApiSign(text, sendResponse)
 			respMsg = '\nSigned by: ' + resp.user;
 			// if (resp.publickey !== null)	
 			// 	respMsg += '\nPublic key: ' + resp.publickey;
-			if (resp.email !== null)	
-				respMsg += '\nEmail: ' + resp.email;
-			respMsg += '\nUse Ctrl + V to paste signed text from clipboard';			
+			// if (resp.email !== null)	
+			// 	respMsg += '\nEmail: ' + resp.email;
+			respMsg += '\nUse Ctrl + V to paste signed text from clipboard';
+			respMsg += '\nClick to see the details';
 			doNotify("Message ", respMsg, resp.msgid);
   		}
 	}
@@ -128,7 +129,8 @@ function doSign(message, key) {
 	return linebrk(hSig, 64);
 }
 
-function doNotify(title, msg, link) {		
+function doNotify(title, msg, link) {
+	//alert(msg);		
 	if (!Notify.needsPermission) {
 		notification(title, msg, link);
 	} else if (Notify.isSupported()) {
@@ -152,7 +154,7 @@ function notification(title, msg, link){
 		//alert(profile);
 		myNotification = new Notify(title, {
 			body: msg,		
-			timeout: 10,
+			timeout: 0,
 			notifyClick: function() {onClickNotification(link)}
 			// ,notifyShow: onShowNotification,
 			// notifyClose: onCloseNotification,		
