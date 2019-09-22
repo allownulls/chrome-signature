@@ -70,6 +70,14 @@ function register()
           // }, 7500);
           ok = true;
         }
+        else
+        {
+          status.textContent = 'Saving options error. Check your connection and try again.';  
+          document.getElementById('pkey').value = "";
+          document.getElementById('pubkey').value = "";
+          document.getElementById('pin').value = "";        
+        }
+
   		}
   }
   xhr.send(param);

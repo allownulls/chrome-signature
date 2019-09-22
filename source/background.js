@@ -17,10 +17,14 @@ function sign(selection, sendResponse) {
 	}
 	lastSelection = selection;
 
+	sanitized = selection.match(/[\x21-\x7E\xA1-\xFF]/g).join("");
+	
 	let pkey = "-----BEGIN RSA PRIVATE KEY-----\n" + window.localStorage.getItem('pkey') + "\n-----END RSA PRIVATE KEY-----";	
-	let signed = doSign(selection,pkey);	
+	let signed = doSign(sanitized,pkey);	
 	let encodedText = selection + '#Fileproof\n' + signed + '\npubkey:' + window.localStorage.getItem('pubkey') + '\n#Fileproof';  
 	
+	//alert('encodedtext: ' + encodedText);	
+
 	callApiSign(encodedText, sendResponse);	
 }
 
@@ -57,7 +61,7 @@ function callApiCheck(text, sendResponse)
 			var resp = JSON.parse(xhr.response);
 			var respMsg = "";                    
 
-			if (resp.check) { 
+			if (resp.check) {
 				respMsg = 'Validation passed!\nSigned by: ' + resp.user;
 				// if (resp.publickey !== null)	
 				// 	respMsg += '\nPublic key: ' + resp.publickey;
@@ -65,7 +69,7 @@ function callApiCheck(text, sendResponse)
 				// 	respMsg += '\nEmail: ' + resp.email;
 			    respMsg += '\nClick to see the details';
 				//+ '\nPublic key: ' + resp.publickey
-				//+ '\nSignature: ' + resp.signature;																	
+				//+ '\nSignature: ' + resp.signature;
 			}
 			else 
 				respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');				
@@ -105,7 +109,8 @@ function callApiSign(text, sendResponse)
 	xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');	
 	xhr.onreadystatechange = function() {		
   		if (xhr.readyState == 4) {			  
-			var resp = JSON.parse(xhr.response);		    
+			var resp = JSON.parse(xhr.response);
+			//alert('server response:' + resp.signed);
 			sendResponse(resp.signed);
 			respMsg = '\nSigned by: ' + resp.user;
 			// if (resp.publickey !== null)	
@@ -139,8 +144,7 @@ function doNotify(title, msg, link) {
 }
 
 function onClickNotification(link) {
-	//alert('Profile: ' + profile);
-	//alert('signerURL' + signerUrl);
+	
 	var signerUrl = domain + '/Profile/ProfileView?id=' + encodeURIComponent(link);
 	
 	chrome.tabs.create({url: signerUrl});
@@ -149,9 +153,8 @@ function onClickNotification(link) {
 function notification(title, msg, link){	
 	var myNotification;
 
-	if (link != null && link != '')
+	if (link != null && link.length > 1)
 	{
-		//alert(profile);
 		myNotification = new Notify(title, {
 			body: msg,		
 			timeout: 0,
@@ -166,7 +169,7 @@ function notification(title, msg, link){
 		//alert('Null!');
 		myNotification = new Notify(title, {
 			body: msg,		
-			timeout: 10		
+			timeout: 0		
 		});
 	};
 

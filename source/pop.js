@@ -34,7 +34,7 @@ var checkIt = function () {
                 else 
                     respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');
                 
-                alert(respMsg);
+                //alert(respMsg);
                 $('#waitSpinner').remove();
             }
         )

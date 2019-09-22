@@ -75,7 +75,8 @@ function changeSelectionClip() {
 
 		if (selectedText !== undefined)		
 			chrome.extension.sendRequest({'notarize': selectedText}, 
-				function (text) {  								
+				function (text) {
+					//alert('callback!\n' + text);
 					if (text !== undefined){
 						//focused.value = focused.value.replace(selectedText, text);
 						textToClipboard(text);
@@ -88,7 +89,8 @@ function changeSelectionClip() {
 			var selectedText = sel.toString();
 			//alert("selText: " + selectedText);
 			chrome.extension.sendRequest({'notarize': selectedText}, 
-						function (text) {  								
+						function (text) {  		
+							//alert('callback!\n' + text);						
 							if (text !== undefined){								
 								// if (sel.rangeCount) {
 								// 	range = sel.getRangeAt(0);
