@@ -1,13 +1,12 @@
 let domain = "http://cvproof-signature.azurewebsites.net"
-// Saves options to chrome.storage
-function saveOptions() {
-  if (profileSealed()) return;  
+//let domain = "http://localhost:14733"
+
+function saveOptions() {  
+  if (profileSealed()) return;    
   generateKeys();
-  if (!register()) return;
+  register();
 }
 
-// Restores select box and checkbox state using the preferences
-// stored in chrome.storage.
 function restoreOptions() {    
   document.getElementById('name').value = window.localStorage.getItem('name');
   document.getElementById('email').value = window.localStorage.getItem('email');
@@ -18,10 +17,7 @@ function restoreOptions() {
 }
 
 function generateKeys() {
-  if (profileSealed()) return;
-
-  var rsaKeypair = KEYUTIL.generateKeypair("RSA", 1024);
-  //rsaKeypair.prvKeyObj.isPrivate = true;
+  var rsaKeypair = KEYUTIL.generateKeypair("RSA", 1024);  
   document.getElementById('pkey').value = KEYUTIL.getPEM(rsaKeypair.prvKeyObj, "PKCS1PRV")
                                                  .replace("-----BEGIN RSA PRIVATE KEY-----","")
                                                  .replace("-----END RSA PRIVATE KEY-----","");
@@ -32,8 +28,6 @@ function generateKeys() {
 
 function register() 
 {  
-  var ok = false;
-
   var jsonModel = {
     "Name" : document.getElementById('name').value,
     "Email" : document.getElementById('email').value,
@@ -41,69 +35,75 @@ function register()
     "PIN" : document.getElementById('pin').value
   };
 
+  var status = document.getElementById('status');
 	var url = domain + "/FingerprintApi/Register";
 	var param = JSON.stringify(jsonModel); 
 			  	
 	var xhr = new XMLHttpRequest();	
 	xhr.open("POST", url);
-	xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');	
+  xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+
+  xhr.onerror = function(e){
+    status.textContent = 'Saving options error. Check your connection and try again.';  
+    document.getElementById('pkey').value = "";
+    document.getElementById('pubkey').value = "";
+    document.getElementById('pin').value = "";   
+  }
+
 	xhr.onreadystatechange = function() {		
-  		if (xhr.readyState == 4) {			  
-        var resp = JSON.parse(xhr.response);		    
+    if (xhr.readyState == 4) {
+      if (xhr.status === 200) {
+        var resp = JSON.parse(xhr.response);
         if (resp.error == null)
-        {          
-          document.getElementById('pin').value = resp.pin;
-          
-          window.localStorage.setItem('pkey', document.getElementById('pkey').value);
-          window.localStorage.setItem('pubkey', document.getElementById('pubkey').value);
-          window.localStorage.setItem('name', document.getElementById('name').value);
-          window.localStorage.setItem('email', document.getElementById('email').value);
-          window.localStorage.setItem('pin', document.getElementById('pin').value);
-         
-          var status = document.getElementById('status');
-          status.textContent = 'Options saved. Close this tab and start using Fileproof signature!';
-
-          updateControls();
-        
-          // setTimeout(function() {
-          //     status.innerHTML = '&nbsp;';
-          // }, 7500);
-          ok = true;
-        }
-        else
         {
-          status.textContent = 'Saving options error. Check your connection and try again.';  
-          document.getElementById('pkey').value = "";
-          document.getElementById('pubkey').value = "";
-          document.getElementById('pin').value = "";        
-        }
-
-  		}
+          updateOptions(resp);
+          status.textContent = 'Options saved. Close this tab and start using Fileproof signature!';
+        } else          
+          showError('Saving options error: ' + resp.error);                  
+      } 
+      else 
+        status.textContent = 'Saving options error. Something went wrong, server returned error.';      
+    }
   }
   xhr.send(param);
+}
+
+function updateOptions(resp){ 
+  document.getElementById('pin').value = resp.pin;
   
-  return ok;
+  window.localStorage.setItem('pkey', document.getElementById('pkey').value);
+  window.localStorage.setItem('pubkey', document.getElementById('pubkey').value);
+  window.localStorage.setItem('name', document.getElementById('name').value);
+  window.localStorage.setItem('email', document.getElementById('email').value);
+  window.localStorage.setItem('pin', document.getElementById('pin').value);         
+
+  updateControls();
 }
 
-function profileSealed()
-{
-  var ret = document.getElementById('pkey').value != ""
-            && document.getElementById('pkey').value != null;    
-  return ret;
-
+function profileSealed(){
+  return document.getElementById('pkey').value;            
 }
 
-function updateControls()
-{
-    if (profileSealed())
-    {
+function updateControls(){
+    if (profileSealed()){
+      document.getElementById('name').disabled = true;
+      document.getElementById('email').disabled = true;      
       document.getElementById('generate').disabled = true;
       document.getElementById('pin').disabled = true;      
-    }
-    else
-    {          
-      document.getElementById('generate').addEventListener('click', saveOptions);
-    }
+    } else 
+      document.getElementById('generate').addEventListener('click', saveOptions);    
+}
+
+function showError(text){  
+  status.textContent = text;
+  document.getElementById('pkey').value = "";
+  document.getElementById('pubkey').value = "";
+  document.getElementById('pin').value = "";
+}
+
+function onNotifyPermissionDenied() {
+  var status = document.getElementById('status');
+  status.textContent = 'Fileproof signature needs notifications to be allowed. Please, check your notification <a href="chrome://settings/content/notifications">settings</a>';  
 }
 
 document.addEventListener('DOMContentLoaded', restoreOptions);

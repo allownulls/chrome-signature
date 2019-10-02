@@ -139,7 +139,7 @@
               return false;
           }
       }
-      return true;
+      return true;  
   };
   
   // true if the permission is not granted

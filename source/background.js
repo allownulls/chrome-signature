@@ -6,15 +6,12 @@ let domain = "http://cvproof-signature.azurewebsites.net"
 
 if (localStorage['lastVersionUsed'] != '1') {
   localStorage['lastVersionUsed'] = '1';
-  chrome.tabs.create({
-    url: chrome.extension.getURL('options.html')
-  });
+  chrome.tabs.create({ url: chrome.extension.getURL('options.html') });
 }
 
 function sign(selection, sendResponse) {
-	if (selection == lastSignSelection) {
-		return;
-	}
+	if (selection == lastSignSelection)
+		return;	
 	lastSelection = selection;
 
 	sanitized = selection.match(/[\x21-\x7E\xA1-\xFF]/g).join("");
@@ -22,80 +19,50 @@ function sign(selection, sendResponse) {
 	let pkey = "-----BEGIN RSA PRIVATE KEY-----\n" + window.localStorage.getItem('pkey') + "\n-----END RSA PRIVATE KEY-----";	
 	let signed = doSign(sanitized,pkey);	
 	let encodedText = selection + '#Fileproof\n' + signed + '\npubkey:' + window.localStorage.getItem('pubkey') + '\n#Fileproof';  
-	
-	//alert('encodedtext: ' + encodedText);	
 
 	callApiSign(encodedText, sendResponse);	
 }
 
-function check(selection, sendResponse) {	
-	if (selection == lastCheckSelection) {
-		return;
-	}
+function check(selection, sendResponse) {
+	if (selection == lastCheckSelection)
+		return;	
 	lastSelection = selection;
-
-	//xxxx to add here:
-	//before checking the selection has to be parsed into following parts:
-	// 1. text
-	// 2. signature
-	// 3. key/id
-	// (todo: parse on client, check signature, send request to find a key)
-
 	callApiCheck(selection, sendResponse);
 }
 
 function callApiCheck(text, sendResponse) 
-{	    
-	var url = domain + '/FingerprintApi/CheckMessage';
-	var param = 'msg='+ encodeURIComponent(text);	
+{	
+  var url = domain + '/FingerprintApi/CheckMessage';
+  var param = 'msg='+ encodeURIComponent(text);	
 
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", url);
-	xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');	
-	xhr.onreadystatechange = function() {		
-  		if (xhr.readyState == 4) {  
-			//resp = JSON.parse(xhr.response);
-			//alert("Check ok! \n check: " + resp.check + "\n status: " + resp.status);			
-			sendResponse(xhr.response);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", url);
+  xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');	
+  xhr.onerror = function(e){
+	  alert("Something went wrong. Server returned error.");
+  };
+  xhr.onreadystatechange = function() {		
+    if (xhr.readyState == 4) {  
+      if (xhr.status === 200) {			  
+		sendResponse(xhr.response);
 			
-			var resp = JSON.parse(xhr.response);
-			var respMsg = "";                    
+		var resp = JSON.parse(xhr.response);
+		var respMsg = "";                    
 
-			if (resp.check) {
-				respMsg = 'Validation passed!\nSigned by: ' + resp.user;
-				// if (resp.publickey !== null)	
-				// 	respMsg += '\nPublic key: ' + resp.publickey;
-				// if (resp.email !== null)	
-				// 	respMsg += '\nEmail: ' + resp.email;
-			    respMsg += '\nClick to see the details';
-				//+ '\nPublic key: ' + resp.publickey
-				//+ '\nSignature: ' + resp.signature;
-			}
-			else 
-				respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');				
-
-			doNotify('Signature Verification', respMsg, resp.msgid);
-
-			// var opt = {
-			// 	type: "basic",
-			// 	title: "Verifying signature...",
-			// 	message: respMsg,
-			// 	iconUrl: "cvproof-finger.png"
-			// };			
-
-			// chrome.notifications.create('Verification', opt, function() {});		
-
-			// create notification using forumUrl as id
-			//chrome.notifications.create(forumUrl, options, function(notificationId){ }); 
-
-			// create a on Click listener for notifications
-			// chrome.notifications.onClicked.addListener(function(notificationId) {
-			//   chrome.tabs.create({url: notificationId});
-			// });  
-  		}
+		if (resp.check) {
+		  respMsg = 'Validation passed!\nSigned by: ' + resp.user;
+		  respMsg += '\nClick to see the details';
+		}
+		else 
+		  respMsg = ('Validity check failed!\n (Parsing status: ' + resp.status + ')');				
+		doNotifyWithCheck('Signature Verification', respMsg, resp.msgid);
+	  } 
+	  else 
+	  	alert("Something went wrong. Server returned error. \nStatus: " + xhr.status);
+	  
 	}
-
-	xhr.send(param);		
+  }
+  xhr.send(param);
 }
 
 function callApiSign(text, sendResponse) 
@@ -106,20 +73,22 @@ function callApiSign(text, sendResponse)
 	
 	var xhr = new XMLHttpRequest();	
 	xhr.open("POST", url);
-	xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');	
+	xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	xhr.onerror = function(e){
+		alert("Something went wrong. Server returned error.");
+	  };
 	xhr.onreadystatechange = function() {		
   		if (xhr.readyState == 4) {			  
-			var resp = JSON.parse(xhr.response);
-			//alert('server response:' + resp.signed);
-			sendResponse(resp.signed);
-			respMsg = '\nSigned by: ' + resp.user;
-			// if (resp.publickey !== null)	
-			// 	respMsg += '\nPublic key: ' + resp.publickey;
-			// if (resp.email !== null)	
-			// 	respMsg += '\nEmail: ' + resp.email;
-			respMsg += '\nUse Ctrl + V to paste signed text from clipboard';
-			respMsg += '\nClick to see the details';
-			doNotify("Message ", respMsg, resp.msgid);
+			if (xhr.status === 200) {
+				var resp = JSON.parse(xhr.response);
+				sendResponse(resp.signed);
+				respMsg = '\nSigned by: ' + resp.user;
+				respMsg += '\nUse Ctrl + V to paste signed text from clipboard';
+				respMsg += '\nClick to see the details';	
+				doNotifyWithCheck("Message ", respMsg, resp.msgid);
+			} 
+			else 
+				alert("Something went wrong. Server returned error. \nStatus: " + xhr.status);			
   		}
 	}
 
@@ -134,27 +103,32 @@ function doSign(message, key) {
 	return linebrk(hSig, 64);
 }
 
-function doNotify(title, msg, link) {
-	//alert(msg);		
-	if (!Notify.needsPermission) {
-		notification(title, msg, link);
-	} else if (Notify.isSupported()) {
-		Notify.requestPermission(onPermissionGranted, onPermissionDenied);
-	}
+function doNotifyWithCheck(title, msg, link) {
+	if (!Notify.needsPermission)
+		onNotifyPermissionGranted(title, msg, link);
+	else if (Notify.isSupported())	
+		Notify.requestPermission(onNotifyPermissionGranted(title, msg, link), onNotifyPermissionDenied)
+	else 
+		onNotifyPermissionDenied();	
 }
 
-function onClickNotification(link) {
-	
-	var signerUrl = domain + '/Profile/ProfileView?id=' + encodeURIComponent(link);
-	
+function onNotifyPermissionDenied() {
+	alert("Fileproof signature extension needs the notifications to be allowed!");
+}
+
+function onNotifyPermissionGranted(title,msg,link) {
+	notification(title,msg,link);
+}
+
+function onClickNotification(link) {	
+	var signerUrl = domain + '/Profile/ProfileView?id=' + encodeURIComponent(link);	
 	chrome.tabs.create({url: signerUrl});
 }
 
 function notification(title, msg, link){	
 	var myNotification;
 
-	if (link != null && link.length > 1)
-	{
+	if (link != null && link.length > 1){
 		myNotification = new Notify(title, {
 			body: msg,		
 			timeout: 0,
@@ -163,10 +137,7 @@ function notification(title, msg, link){
 			// notifyClose: onCloseNotification,		
 			// notifyError: onErrorNotification,
 		})
-	}
-	else
-	{
-		//alert('Null!');
+	} else {		
 		myNotification = new Notify(title, {
 			body: msg,		
 			timeout: 0		
@@ -176,22 +147,16 @@ function notification(title, msg, link){
 	myNotification.show();
 }
 
-
-
-
-function initBackground() {
-	//console.log('initbg');	
+function initBackground() {	
 	loadContentScriptInAllTabs();
 
 	var notarizeKeyString = getNotarizeKeyString();		
-	if (localStorage['notarizeKey'] == undefined) {
-		localStorage['notarizeKey'] = notarizeKeyString;		
-	}
+	if (localStorage['notarizeKey'] == undefined) 
+		localStorage['notarizeKey'] = notarizeKeyString;			
 	
 	var checkKeyString = getCheckKeyString();
-	if (localStorage['checkKey'] == undefined) {
+	if (localStorage['checkKey'] == undefined)
 		localStorage['checkKey'] = checkKeyString;	
-	}	
 
 	sendNotarizeKeyToAllTabs(notarizeKeyString);
 	sendCheckKeyToAllTabs(checkKeyString);
@@ -200,7 +165,6 @@ function initBackground() {
 		function(request, sender, sendResponse) {		
 			if (request['init']) {			
 				sendResponse({'notarizeKey': localStorage['notarizeKey'],'checkKey': localStorage['checkKey']});
-				//sendResponse({'checkKey': localStorage['checkKey']});
 			} else if (request['notarize']) {			
 				sign(request['notarize'], sendResponse)		  
 			}
@@ -217,8 +181,6 @@ function initBackground() {
 			tab.id,
 			{'changeSelectionClip': true});
 		});
-
-	//console.log('initbg-finish');	
 }
 
 initBackground();
