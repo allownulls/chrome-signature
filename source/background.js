@@ -2,7 +2,7 @@ var lastSignSelection = '';
 var lastCheckSelection = '';
 var globalUtteranceIndex = 0;
 let domain = "http://cvproof-signature.azurewebsites.net"
-//let domain = "http://localhost:14733";	
+//let domain = "http://localhost:14733";
 
 if (localStorage['lastVersionUsed'] != '1') {
   localStorage['lastVersionUsed'] = '1';
@@ -28,6 +28,12 @@ function check(selection, sendResponse) {
 		return;	
 	lastSelection = selection;
 	callApiCheck(selection, sendResponse);
+}
+
+function decrypt(cypher, sendResponse){ 
+	let pkey = "-----BEGIN RSA PRIVATE KEY-----\n" + window.localStorage.getItem('pkey') + "\n-----END RSA PRIVATE KEY-----";	
+	var ret = doDecrypt(cypher, pkey);	
+	sendResponse(ret);
 }
 
 function callApiCheck(text, sendResponse) 
@@ -103,6 +109,14 @@ function doSign(message, key) {
 	return linebrk(hSig, 64);
 }
 
+function doDecrypt(message, key) {	
+	var rsa = new RSAKey();
+	rsa.readPrivateKeyFromPEMString(key);
+	//var hashAlg = "sha256";
+	var hDec = rsa.b64_decrypt(message);	
+	return hDec;
+}
+
 function doNotifyWithCheck(title, msg, link) {
 	if (!Notify.needsPermission)
 		onNotifyPermissionGranted(title, msg, link);
@@ -163,6 +177,7 @@ function initBackground() {
 
 	chrome.extension.onRequest.addListener(
 		function(request, sender, sendResponse) {		
+
 			if (request['init']) {			
 				sendResponse({'notarizeKey': localStorage['notarizeKey'],'checkKey': localStorage['checkKey']});
 			} else if (request['notarize']) {			
@@ -170,6 +185,9 @@ function initBackground() {
 			}
 			else if (request['check']) {			
 				check(request['check'], sendResponse)		  
+			}
+			else if (request['decrypt']){
+				decrypt(request['decrypt'], sendResponse)
 			}
 			return true;
 		}

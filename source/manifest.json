@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "FileProof signature",
 	"description": "This extension signs text messages with FileProof service",
-	"version": "1.03",
+	"version": "1.04",
 	"minimum_chrome_version": "66",	
 	"options_page": "options.html",
 	"options_ui": {
@@ -28,6 +28,8 @@
 		"notify.js",
 		"background.js",
 		"jsrsasign-all-min.js",
+		"jsbn2.js",
+		"rsa2.js",
 		"jquery-1.9.1.min.js",
 		"pop.js"		
 	]

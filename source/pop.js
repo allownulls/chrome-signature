@@ -42,5 +42,24 @@ var checkIt = function () {
         $('#waitSpinner').remove();
 }
 
+var decryptIt = function () {    
+    $('#waitSpinner').remove();
+    $('#decryptBtn').append($("<i id='waitSpinner' class='fa fa-spinner fa-spin'></i>"));
+    var msg = $('#Message').val();
+    if (msg !== undefined)
+        chrome.extension.sendRequest({'decrypt': msg},
+        function (text) {
+            if (text !== undefined){
+                $('#Message').val(text);
+                $('#waitSpinner').remove();
+            }
+        }
+    )
+    else 
+        $('#waitSpinner').remove();
+}
+
+
 $('#sendBtn').click(signIt);
 $('#checkBtn').click(checkIt);
+$('#decryptBtn').click(decryptIt);
